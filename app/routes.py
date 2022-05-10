@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect, url_for, request, jsonify, make_response
 from app import app
 from app import db
-from app.models import Loan, Payment, jsonify_loan, jsonify_payment
+from app.models import Loan, Payment, jsonify_loan, jsonify_payment, jsonify_refund
 
 @app.route('/create_loan', methods=['POST'])
 def create_loan():
@@ -93,14 +93,8 @@ def request_refund():
             loan.amount_owed = loan.amount_owed + payment.payment_amount
             payment.refunded = True
             db.session.commit()
-            return make_response(jsonify({
-                "Success" : "Refund processed, of amount equal to: " + str(payment.payment_amount),
-                "Loan Information: " : {
-                    'loan_id' : loan.id,
-                    'loan_amount' : loan.loan_amount,
-                    'amount_owed' : loan.amount_owed
-                }
-            }), 200)
+            #clean this up.
+            return make_response(jsonify_refund(payment, loan), 200)
         else:
             return make_response(jsonify({
                 "Error": "Requested payment refund has already been refunded."

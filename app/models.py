@@ -32,3 +32,21 @@ def jsonify_loan(loan):
             'loan_amount' : loan.loan_amount,
             'amount_owed' : loan.amount_owed
         })
+
+def jsonify_refund(payment, loan):
+    return jsonify(
+        {
+            "Success" : "Payment: " + str(payment.id) + " has been refunded successfully.",
+            "Payment Information" : {
+                "payment_id" : payment.id,
+                "payment_amount" : payment.payment_amount,
+                "loan_id" : loan.id,
+                "refunded" : payment.refunded
+            },
+            "Loan Information" : {
+                'loan_id' : loan.id,
+                'loan_amount' : loan.loan_amount,
+                'amount_owed' : loan.amount_owed
+            }
+        }
+    )
