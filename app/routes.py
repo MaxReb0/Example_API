@@ -10,6 +10,10 @@ def create_loan():
         and append a loan to the loan table in the database. The goal here is that it
         will eventually be linked to the User that initiated the loan, as well as the 
         attempts to pay off the loan.
+        Expects JSON of format:
+        {
+            "amount" : <amount being requested for loan.>
+        }
     """
     input_json = request.get_json(force=True)
     if "amount" in input_json.keys():
@@ -18,10 +22,18 @@ def create_loan():
         db.session.commit()
         return make_response(jsonify_loan(new_loan), 200)
     else:
-        return make_response(jsonify({}), 400)
+        return make_response(jsonify({"Error" : "'amount' not provided."}), 400)
 
 @app.route('/get_loan', methods=['GET'])
 def get_loan():
+    """
+        This function is used to get a loan. This API currently only supports
+        paying off loans, and not other types of payments. 
+        It just expects a JSON of the following format:
+        {
+            'id' :  <id of loan>
+        }
+    """
     input_json = request.get_json(force=True)
     loan_exists = db.session.query(Loan.id).filter_by(id = input_json['id']).first() is not None
     if 'id' in input_json.keys() and loan_exists:
@@ -40,34 +52,50 @@ def create_payment():
         is larger than the amount owed, it will be refunded. If it is less, it will
         simply process the payment and remove the amount owed. If the loan doesn't exist,
         it will simply return a 400 status code.
+        It expects a JSON of the following format
+        {
+            "id" : <id of loan being payed.>
+            "payment_amount" : <amount of loan being payed off>
+        }
     """
     input_json = request.get_json(force=True)
     loan_exists = db.session.query(Loan.id).filter_by(id = input_json['id']).first() is not None
     # In this case the loan requested exists, so we can go forward with payment.
     if "id" in input_json.keys() and loan_exists:
         #This will first create the payment and append it to the database.
-        loan = Loan.query.get(input_json['id'])
+        if "payment_amount" in input_json.keys():
+            loan = Loan.query.get(input_json['id'])
 
-        #This is the case where too much has been payed.
-        if loan.amount_owed - input_json['payment_amount'] < 0:
-            return make_response(jsonify(
-                {
-                    "Error": "The requested payment is greater than the amount owed.",
-                    "amount_owed" : loan.amount_owed,
-                    "attempted_payment_amount": input_json['payment_amount']
-                }), 400)
+            #This is the case where too much has been payed.
+            if loan.amount_owed - input_json['payment_amount'] < 0:
+                return make_response(jsonify(
+                    {
+                        "Error": "The requested payment is greater than the amount owed.",
+                        "amount_owed" : loan.amount_owed,
+                        "attempted_payment_amount": input_json['payment_amount']
+                    }), 400)
 
-        new_payment = Payment(payment_amount = input_json['payment_amount'], loan = loan, refunded = False)
-        db.session.add(new_payment)
-        #Now we need to update the loan with the new balance owed.
-        loan.amount_owed = loan.amount_owed - new_payment.payment_amount
-        db.session.commit()
-        return make_response(jsonify_payment(new_payment, loan), 200)
+            new_payment = Payment(payment_amount = input_json['payment_amount'], loan = loan, refunded = False)
+            db.session.add(new_payment)
+            #Now we need to update the loan with the new balance owed.
+            loan.amount_owed = loan.amount_owed - new_payment.payment_amount
+            db.session.commit()
+            return make_response(jsonify_payment(new_payment, loan), 200)
+        else:
+            return make_response(jsonify({"Error" : "'payment_amount' not included in request."}))
     else:
         return make_response(jsonify({"Error" : "ID wasn't recognized as entry in database."}), 400)
 
 @app.route("/get_payment", methods=["GET"])
 def get_payment():
+    """
+        This function is used to get a payment. This API currently only supports
+        paying off loans, and not other types of payments. 
+        It just expects a JSON of the following format:
+        {
+            'id' :  <id of payment>
+        }
+    """
     input_json = request.get_json(force=True)
     payment_exists = db.session.query(Payment.id).filter_by(id = input_json['id']).first() is not None
     if 'id' in input_json.keys() and payment_exists:
