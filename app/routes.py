@@ -110,6 +110,14 @@ def get_payment():
 
 @app.route("/request_refund", methods=["POST"])
 def request_refund():
+    """
+        This function takes a payment id and attempts to refund it. If the payment
+        has already been refunded it will return an error.
+        It expects a JSON of this format:
+        {
+            'id' : <id of payment>
+        }
+    """
     input_json = request.get_json(force=True)
     payment_exists = db.session.query(Payment.id).filter_by(id = input_json['id']).first() is not None
     if "id" in input_json.keys() and payment_exists:
