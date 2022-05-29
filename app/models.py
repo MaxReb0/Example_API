@@ -4,11 +4,11 @@ from flask import jsonify
 from pydantic import BaseModel
 import uuid
 
-# class Loan(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     loan_amount = db.Column(db.Integer)
-#     amount_owed = db.Column(db.Integer)
-#     payments = db.relationship('Payment', backref='loan', lazy='dynamic')
+class Loan(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    loan_amount = db.Column(db.Integer)
+    amount_owed = db.Column(db.Integer)
+    payments = db.relationship('Payment', backref='loan', lazy='dynamic')
 
 class Loan_Validator(BaseModel):
     id = uuid.uuid4()
