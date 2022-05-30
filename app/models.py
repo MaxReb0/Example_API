@@ -1,7 +1,7 @@
 from datetime import datetime
 from app import db
 from flask import jsonify
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 import uuid
 
 class Loan(db.Model):
@@ -11,10 +11,7 @@ class Loan(db.Model):
     payments = db.relationship('Payment', backref='loan', lazy='dynamic')
 
 class Loan_Validator(BaseModel):
-    id = uuid.uuid4()
     loan_amount: int
-    amount_owed: int
-    #payments = db.relationship('Payment', backref='loan', lazy='dynamic')
 
 class Payment(db.Model):
     #Add timestamp
@@ -23,6 +20,26 @@ class Payment(db.Model):
     payment_amount = db.Column(db.Integer)
     loan_id = db.Column(db.Integer, db.ForeignKey('loan.id'))
     refunded = db.Column(db.Boolean)
+
+class Payment_Validator(BaseModel):
+    # Need to verify that this loan exists in the database.
+    loan_id: int
+    payment_amount: int
+
+    @validator("loan_id")
+    def id_must_be_in_database(cls, loan_id):
+        if db.session.query(Loan.id).filter_by(id = loan_id).first() is None:
+            raise ValueError(f"Error, id : {loan_id} is not in  the database!")
+        return loan_id
+    
+    @validator('payment_amount')
+    def payment_greater_than_amount_owed(cls, payment_amount, values):
+        print(values)
+        loan_id = values["loan_id"]
+        if db.session.query(Loan.id).filter_by(id = loan_id).first() is not None:
+            loan = Loan.query.get(loan_id)
+            if loan.amount_owed < payment_amount:
+                raise ValueError(f"Error, loan {loan_id} only needs {loan.amount_owed}, but the payment amount is {payment_amount}.")
 
 def jsonify_payment(payment, loan):
     return jsonify(

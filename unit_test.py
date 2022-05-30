@@ -3,15 +3,26 @@ import requests_mock
 import pytest
 import json
 
+"""
+    Write unit tests so that your server doesn't have to be actually running. Use request_mock. Reference Flask tutorial
+
+    Use Pydantic
+    Write unit tests properly
+    Use timing functions from tutorial to better time functionality of API
+    Look into raising error properly from Flask tutorial chapter 7
+    Remember the time a payment to a loan was made, and don't let another payment be made in the next 30s to prevent 
+        duplicate charges.
+"""
+
 def create_small_loan():
-    test_data = {"amount" : 2}
+    test_data = {"loan_amount" : 2}
     resp = requests.post("http://localhost:5000/create_loan", data = json.dumps(test_data), headers={'Content-Type': 'application/json'})
     assert resp.json()['amount_owed'] == 2
     assert resp.json()['loan_amount'] == 2
     assert resp.status_code == 200
 
 def create_and_get_loan():
-    test_data = {"amount" : 2}
+    test_data = {"loan_amount" : 2}
     resp = requests.post("http://localhost:5000/create_loan", data = json.dumps(test_data), headers={'Content-Type': 'application/json'})
     assert resp.json()['amount_owed'] == 2
     assert resp.json()['loan_amount'] == 2
@@ -23,14 +34,14 @@ def create_and_get_loan():
     assert new_loan == old_loan
 
 def create_large_loan():
-    test_data = {"amount" : 25000}
+    test_data = {"loan_amount" : 25000}
     resp = requests.post("http://localhost:5000/create_loan", data = json.dumps(test_data), headers={'Content-Type': 'application/json'})
     assert resp.json()['amount_owed'] == 25000
     assert resp.json()['loan_amount'] == 25000
     assert resp.status_code == 200
 
 def create_loan_and_payment():
-    test_data = {"amount" : 25000}
+    test_data = {"loan_amount" : 25000}
     resp = requests.post("http://localhost:5000/create_loan", data = json.dumps(test_data), headers={'Content-Type': 'application/json'})
     assert resp.json()['amount_owed'] == 25000
     assert resp.json()['loan_amount'] == 25000
@@ -51,7 +62,7 @@ def create_nonexistant_payment():
     assert resp.json() == {'Error': "ID wasn't recognized as entry in database."}
 
 def create_payment_greater_than_loan():
-    test_data = {"amount" : 25000}
+    test_data = {"loan_amount" : 25000}
     resp = requests.post("http://localhost:5000/create_loan", data = json.dumps(test_data), headers={'Content-Type': 'application/json'})
     assert resp.json()['amount_owed'] == 25000
     assert resp.json()['loan_amount'] == 25000
@@ -66,7 +77,7 @@ def create_payment_greater_than_loan():
     assert resp.status_code == 400
 
 def create_refund():
-    test_data = {"amount" : 25000}
+    test_data = {"loan_amount" : 25000}
     resp = requests.post("http://localhost:5000/create_loan", data = json.dumps(test_data), headers={'Content-Type': 'application/json'})
     assert resp.json()['amount_owed'] == 25000
     assert resp.json()['loan_amount'] == 25000
