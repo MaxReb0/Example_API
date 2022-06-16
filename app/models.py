@@ -2,12 +2,15 @@ from datetime import datetime
 from app import db
 from flask import jsonify
 from pydantic import BaseModel, validator
+from sqlalchemy.sql import func
 import uuid
 
 class Loan(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     loan_amount = db.Column(db.Integer)
     amount_owed = db.Column(db.Integer)
+    time_created = db.Column(db.DateTime(timezone=True), default=datetime.now())
+    time_updated = db.Column(db.DateTime(timezone=True), default=datetime.now(), onupdate=datetime.now())
     payments = db.relationship('Payment', backref='loan', lazy='dynamic')
 
 class Loan_Validator(BaseModel):
@@ -28,6 +31,8 @@ class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     payment_amount = db.Column(db.Integer)
     loan_id = db.Column(db.Integer, db.ForeignKey('loan.id'))
+    time_created = db.Column(db.DateTime(timezone=True), default=datetime.now())
+    time_updated = db.Column(db.DateTime(timezone=True), default=datetime.now(), onupdate=datetime.now())
     refunded = db.Column(db.Boolean)
 
 class Payment_Validator(BaseModel):
@@ -41,6 +46,15 @@ class Payment_Validator(BaseModel):
             raise ValueError(f"Error, loan id : {loan_id} is not in the database of loans!")
         return loan_id
     
+    @validator("loan_id")
+    def cannot_make_duplicate_payments(cls, loan_id):
+        current_time = datetime.now()
+        payments = Payment.query.filter(loan_id == Payment.loan_id)
+        for p in payments:
+            if (current_time - p.time_created).seconds < 30:
+                raise ValueError(f"Error, a payment has already been made to loan {loan_id} in the past 30 seconds. ")
+        return loan_id
+
     @validator('payment_amount')
     def payment_greater_than_amount_owed(cls, payment_amount, values):
         if "loan_id" in values.keys():
