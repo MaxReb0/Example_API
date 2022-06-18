@@ -182,34 +182,3 @@ def test_create_faulty_id_for_refund(client):
     resp = json.loads(resp.data)
     assert resp == [{'loc': ['payment_id'], 'msg': 'value is not a valid integer', 'type': 'type_error.integer'}]
     assert status_code == 400
-
-#def test_small_loan():
-#    create_small_loan()
-    #create_refund()
-    #create_nonexistant_refund()
-    #create_faulty_refund()
-"""
-def test_create_and_get_loan():
-    create_and_get_loan()
-
-def test_large_loan():
-    create_large_loan()
-
-def test_loan_and_payment():
-    create_loan_and_payment()
-
-def test_create_nonexistant_payment():
-    create_nonexistant_payment()
-
-def test_create_payment_greater_than_loan():
-    create_payment_greater_than_loan()
-
-def test_create_refund():
-    create_refund()
-
-def test_create_nonexistant_refund():
-    create_nonexistant_refund()
-
-def test_create_faulty_id_for_refund():
-    create_faulty_id_for_refund()
-"""
