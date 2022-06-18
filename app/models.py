@@ -1,7 +1,7 @@
 from datetime import datetime
 from app import db
 from flask import jsonify
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, conint
 from sqlalchemy.sql import func
 import uuid
 
@@ -14,7 +14,9 @@ class Loan(db.Model):
     payments = db.relationship('Payment', backref='loan', lazy='dynamic')
 
 class Loan_Validator(BaseModel):
-    loan_amount: int
+    loan_amount: conint(gt=0)
+
+    # add validator to check that the value is correct.
 
 class Get_Loan_Validator(BaseModel):
     loan_id : int
@@ -38,7 +40,7 @@ class Payment(db.Model):
 class Payment_Validator(BaseModel):
     # Need to verify that this loan exists in the database.
     loan_id: int
-    payment_amount: int
+    payment_amount: conint(gt=0)
 
     @validator("loan_id")
     def id_must_be_in_database(cls, loan_id):
@@ -55,15 +57,27 @@ class Payment_Validator(BaseModel):
                 raise ValueError(f"Error, a payment has already been made to loan {loan_id} in the past 30 seconds. ")
         return loan_id
 
+    # Create another validator for payment values ( Not negative. )
     @validator('payment_amount')
     def payment_greater_than_amount_owed(cls, payment_amount, values):
+        print("here is the payment amount: ", payment_amount)
         if "loan_id" in values.keys():
             loan_id = values["loan_id"]
             if db.session.query(Loan.id).filter_by(id = loan_id).first() is not None:
                 loan = Loan.query.get(loan_id)
                 if loan.amount_owed < payment_amount:
                     raise ValueError(f"Error, loan {loan_id} only needs {loan.amount_owed}, but the payment amount is {payment_amount}.")
+                print("does it go here even when raising error?")
                 return payment_amount
+
+    """@validator('payment_amount')
+    def payment_less_than_zero(cls, payment_amount, values):
+        print("Here is the payment amount!: ", payment_amount, values)
+        if "payment_amount" in values:
+            payment_amount = values["payment_amount"]
+        if payment_amount <= 0:
+            raise ValueError(f"Error, payment_amount must be positive.")
+    """
 
 class Get_Payment_Validator(BaseModel):
     payment_id: int
