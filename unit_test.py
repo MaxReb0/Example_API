@@ -93,6 +93,33 @@ def test_create_loan_and_payment(client):
     assert not resp['refunded']
     assert status_code == 200
 
+def test_get_payment(client):
+    test_data = {"loan_amount" : 25000}
+    resp = client.post("/create_loan", json = test_data)
+    status_code = resp.status_code
+    resp = json.loads(resp.data)
+    assert resp['amount_owed'] == 25000
+    assert resp['loan_amount'] == 25000
+    assert status_code == 200
+    # Now that we have the proper loan, we should pay it off.
+    loan_id = resp['loan_id']
+    test_data = {"loan_id" : resp['loan_id'], "payment_amount" : 20000}
+    resp = client.post("/create_payment", json = test_data)
+    status_code = resp.status_code
+    resp = json.loads(resp.data)
+    assert resp['amount_owed'] == 5000
+    assert resp['loan_amount'] == 25000
+    assert resp['payment_amount'] == 20000
+    assert not resp['refunded']
+    assert status_code == 200
+    payment_id = resp["payment_id"]
+    test_data = {"payment_id" : resp["payment_id"]}
+    resp = client.get("get_payment", json = test_data)
+    status_code = resp.status_code
+    resp = json.loads(resp.data)
+    assert resp == {'amount_owed': 5000, 'loan_amount': 25000, 'loan_id': loan_id, 'payment_amount': 20000, 'payment_id': payment_id, 'refunded': False}
+    assert status_code == 200
+
 def test_create_nonexistant_payment(client):
     test_data = {"loan_id" : -1, "payment_amount" : 20000}
     resp = client.post("/create_payment", json = test_data)

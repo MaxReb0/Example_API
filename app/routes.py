@@ -19,9 +19,9 @@ def create_loan():
     input_json = request.get_json(force=True)
     try:
         #Validate inputs
-        Loan_Validator(**input_json)
+        loan_data = Loan_Validator(**input_json)
 
-        new_loan = Loan(loan_amount = input_json['loan_amount'], amount_owed = input_json['loan_amount'])
+        new_loan = Loan(loan_amount = loan_data.loan_amount, amount_owed = loan_data.loan_amount)
         db.session.add(new_loan)
         db.session.commit()
         return make_response(jsonify_loan(new_loan), 200)
@@ -45,9 +45,9 @@ def get_loan():
     input_json = request.get_json(force=True)
     try:
         #Validate inputs.
-        Get_Loan_Validator(**input_json)
+        loan_data = Get_Loan_Validator(**input_json)
         
-        loan = Loan.query.get(input_json['loan_id'])
+        loan = Loan.query.get(loan_data.loan_id)
         return make_response(jsonify_loan(loan), 200)
     except ValidationError as e:
         print(e)
@@ -70,11 +70,11 @@ def create_payment():
     input_json = request.get_json(force=True)
     try:
         #Instantiate this class, and check if there are any issues.
-        Payment_Validator(**input_json)
+        payment_data = Payment_Validator(**input_json)
 
         #Once validated, can simply create the payment, and add it to the database.
-        loan = Loan.query.get(input_json['loan_id'])
-        new_payment = Payment(payment_amount = input_json['payment_amount'], loan = loan, refunded = False)
+        loan = Loan.query.get(payment_data.loan_id)
+        new_payment = Payment(payment_amount = payment_data.payment_amount , loan = loan, refunded = False)
         db.session.add(new_payment)
         loan.amount_owed = loan.amount_owed - new_payment.payment_amount
         db.session.commit()
@@ -83,6 +83,7 @@ def create_payment():
         print(e)
         return make_response(e.json(), 400)
 
+#Write a test for get_payment.
 @app.route("/get_payment", methods=["GET"])
 def get_payment():
     """
@@ -96,9 +97,12 @@ def get_payment():
     input_json = request.get_json(force=True)
     try:
         # Validate inputs.
-        Get_Payment_Validator(**input_json)
-    
-        payment = Payment.query.get(input_json['payment_id'])
+        # Call it payment or Payment_Data. Payment_Model.
+        # Look into mocker.patch
+        # look into pytest mock, mocking out a function. The idea is that it would just test the actual functionality and that everything else that persists normally would be mocked.
+        payment_data = Get_Payment_Validator(**input_json)
+        #Can call directly from validator.
+        payment = Payment.query.get(payment_data.payment_id)
         loan = Loan.query.get(payment.loan_id)
         return make_response(jsonify_payment(payment, loan), 200)
     except ValidationError as e:
@@ -118,10 +122,10 @@ def request_refund():
     input_json = request.get_json(force=True)
     try:
         # validate inputs.
-        Refund_Validator(**input_json)
+        refund_data = Refund_Validator(payment_id = input_json["payment_id"])
 
         # Everything has been validated correctly.
-        payment = Payment.query.get(input_json['payment_id'])
+        payment = Payment.query.get(refund_data.payment_id)
         loan = Loan.query.get(payment.loan_id)
         loan.amount_owed = loan.amount_owed + payment.payment_amount
         payment.refunded = True
