@@ -4,6 +4,7 @@ DEV_REQUIRES = [
     "pytest",
     "pytest-cov",
     "pytest-mock",
+    "python-dotenv",
     "requests-mock",
 ]
 

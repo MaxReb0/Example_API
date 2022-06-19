@@ -1,9 +1,16 @@
 SHELL := /bin/bash
 .ONESHELL:
 .PHONY: clean clean-test clean-pyc clean-build
-.DEFAULT_GOAL := setup
+.DEFAULT_GOAL := show-commands
 
-setup: venv activate-venv install-dev install
+CURR_DIR := $(shell basename `pwd`)
+
+show-commands:
+	@echo "make venv   : create virtualenv"
+	@echo "make install: install package and dependecies"
+	@echo "make test   : run unit tests"
+	@echo "make clean  : remove Python build, test artifacts"
+	@echo "make run    : run local server"
 
 clean: clean-build clean-pyc clean-test
 
@@ -27,14 +34,10 @@ clean-test:
 	rm -fr .pytest_cache
 
 venv:
-	@if [ ! -d .venv ]; then echo "Creating virtualenv"; python3 -m venv .venv; fi
-	@echo "virtualenv created"
-	
-activate-venv:
-	@echo "Activating virtual env"
-	. .venv/bin/activate
+	@if [ ! -d .venv ]; then echo "Creating virtualenv"; python3 -m venv .venv-$(CURR_DIR); fi
+	@echo "Run 'source .venv-$(CURR_DIR)/bin/activate' to activate virtualenv"
 
-install:
+install: install-dev
 	@echo "Installing package"
 	pip install .
 
