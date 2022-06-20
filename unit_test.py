@@ -7,7 +7,7 @@ from flask import Flask, json
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from config import Config
-from app import app as application
+from example_api import app as application
 
 """
     Write unit tests so that your server doesn't have to be actually running. Use request_mock. Reference Flask tutorial

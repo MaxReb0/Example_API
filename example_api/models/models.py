@@ -1,7 +1,8 @@
 from datetime import datetime
-from app import db
+from example_api import db
 from flask import jsonify
 from pydantic import BaseModel, validator, conint
+from pydantic.fields import ModelField
 from sqlalchemy.sql import func
 import uuid
 
@@ -13,12 +14,18 @@ class Loan(db.Model):
     time_updated = db.Column(db.DateTime(timezone=True), default=datetime.now(), onupdate=datetime.now())
     payments = db.relationship('Payment', backref='loan', lazy='dynamic')
 
-class Loan_Validator(BaseModel):
-    loan_amount: conint(gt=0)
 
-    # add validator to check that the value is correct.
+class LoanCreateModel(BaseModel):
+    loan_amount: int
 
-class Get_Loan_Validator(BaseModel):
+    @validator("loan_amount")
+    def greater_than_zero(cls, v, field: ModelField):
+        if v > 0:
+            return v
+        raise ValueError(f"'{field.alias}' must be greater than 0")
+
+
+class Get_LoanModel(BaseModel):
     loan_id : int
 
     @validator("loan_id")
@@ -37,7 +44,7 @@ class Payment(db.Model):
     time_updated = db.Column(db.DateTime(timezone=True), default=datetime.now(), onupdate=datetime.now())
     refunded = db.Column(db.Boolean)
 
-class Payment_Validator(BaseModel):
+class PaymentModel(BaseModel):
     # Need to verify that this loan exists in the database.
     loan_id: int
     payment_amount: conint(gt=0)
@@ -79,7 +86,7 @@ class Payment_Validator(BaseModel):
             raise ValueError(f"Error, payment_amount must be positive.")
     """
 
-class Get_Payment_Validator(BaseModel):
+class Get_PaymentModel(BaseModel):
     payment_id: int
 
     @validator("payment_id")
@@ -87,7 +94,7 @@ class Get_Payment_Validator(BaseModel):
         if db.session.query(Payment.id).filter_by(id = payment_id).first() is None:
             raise ValueError(f"Error, id : {payment_id} is not in the payment database!")
 
-class Refund_Validator(BaseModel):
+class RefundModel(BaseModel):
     payment_id: int
 
     @validator("payment_id")
