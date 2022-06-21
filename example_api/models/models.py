@@ -1,5 +1,5 @@
 from datetime import datetime
-from example_api import db
+from database import db
 from flask import jsonify
 from pydantic import BaseModel, validator, conint
 from pydantic.fields import ModelField
@@ -67,24 +67,14 @@ class PaymentModel(BaseModel):
     # Create another validator for payment values ( Not negative. )
     @validator('payment_amount')
     def payment_greater_than_amount_owed(cls, payment_amount, values):
-        print("here is the payment amount: ", payment_amount)
         if "loan_id" in values.keys():
             loan_id = values["loan_id"]
             if db.session.query(Loan.id).filter_by(id = loan_id).first() is not None:
                 loan = Loan.query.get(loan_id)
                 if loan.amount_owed < payment_amount:
                     raise ValueError(f"Error, loan {loan_id} only needs {loan.amount_owed}, but the payment amount is {payment_amount}.")
-                print("does it go here even when raising error?")
                 return payment_amount
 
-    """@validator('payment_amount')
-    def payment_less_than_zero(cls, payment_amount, values):
-        print("Here is the payment amount!: ", payment_amount, values)
-        if "payment_amount" in values:
-            payment_amount = values["payment_amount"]
-        if payment_amount <= 0:
-            raise ValueError(f"Error, payment_amount must be positive.")
-    """
 
 class Get_PaymentModel(BaseModel):
     payment_id: int
@@ -93,6 +83,7 @@ class Get_PaymentModel(BaseModel):
     def does_payment_exist(cls, payment_id):
         if db.session.query(Payment.id).filter_by(id = payment_id).first() is None:
             raise ValueError(f"Error, id : {payment_id} is not in the payment database!")
+        return payment_id
 
 class RefundModel(BaseModel):
     payment_id: int
@@ -110,6 +101,7 @@ class RefundModel(BaseModel):
             payment = Payment.query.get(payment_id)
             if payment.refunded:
                 raise ValueError(f"Error, payment id : {payment_id} has already been refunded!")
+        return payment_id
 
 
 
