@@ -7,8 +7,3 @@ from example_api import app
 
 #app = Flask(__name__)
 
-
-
-
-
-        

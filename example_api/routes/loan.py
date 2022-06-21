@@ -3,11 +3,12 @@ from flask import Blueprint, make_response, request
 from pydantic import ValidationError
 from database import db
 from example_api.models.models import LoanCreateModel, Get_LoanModel, Loan, jsonify_loan
+from .helper_functions import timer
 
 loan_blueprint = Blueprint("loan", __name__, url_prefix="/loan")
 
-@loan_blueprint.route("/", methods=['POST'])
-def loan_create_handler():
+@timer
+def create_loan(request):
     data = request.get_json(force=True)
     try:
         loan_create_request = LoanCreateModel(**data)
@@ -19,10 +20,8 @@ def loan_create_handler():
     except ValidationError as e:
         return make_response(e.json(), 400)
 
-
-@loan_blueprint.route("/", defaults={"loan_id": None})
-@loan_blueprint.route("/<loan_id>", methods=['GET'])
-def loan_get_handler(loan_id: str):
+@timer
+def get_loan(request):
     """
         This function is used to get a loan. This API currently only supports
         paying off loans, and not other types of payments. 
@@ -41,8 +40,12 @@ def loan_get_handler(loan_id: str):
     except ValidationError as e:
         print(e)
         return make_response(e.json(), 400)
-"""
-    if loan_id:
-        return {"loan_id": loan_id}
-    return make_response({"error": f"Must provide '/<loan_id>'"}, 400)
-"""
+
+@loan_blueprint.route("/", methods=['POST'])
+def loan_create_handler():
+    return create_loan(request)
+
+@loan_blueprint.route("/", defaults={"loan_id": None})
+@loan_blueprint.route("/<loan_id>", methods=['GET'])
+def loan_get_handler(loan_id: str):
+    return get_loan(request)

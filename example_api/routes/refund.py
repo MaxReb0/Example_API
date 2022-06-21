@@ -2,12 +2,15 @@ from flask import Blueprint, make_response, request
 from pydantic import ValidationError
 from database import db
 from example_api.models.models import RefundModel, Payment, Loan, jsonify_refund
+from .helper_functions import timer
+####
+# MAKE SURE TO ADD TIMING METRICS as DATAVALUES AS WELL AS ROUTE DECORATORS
+####
 
 refund_blueprint = Blueprint("refund", __name__, url_prefix="/refund")
 
-@refund_blueprint.route("/", methods=['POST'])
-@refund_blueprint.route('/request_refund', methods=['POST'])
-def request_refund():
+@timer
+def request_refund(request):
     """
         This function takes a payment id and attempts to refund it. If the payment
         has already been refunded it will return an error.
@@ -31,3 +34,8 @@ def request_refund():
     except ValidationError as e:
         print(e)
         return make_response(e.json(), 400)
+
+@refund_blueprint.route("/", methods=['POST'])
+@refund_blueprint.route('/request_refund', methods=['POST'])
+def request_refund_handler():
+    return request_refund(request)

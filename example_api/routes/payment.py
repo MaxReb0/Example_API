@@ -2,13 +2,13 @@
 from flask import Blueprint, make_response, request
 from pydantic import ValidationError
 from database import db
+from .helper_functions import timer
 from example_api.models.models import PaymentModel, Get_PaymentModel, LoanCreateModel, Loan, Payment, jsonify_payment
 
 payment_blueprint = Blueprint("payment", __name__, url_prefix="/payment")
 
-@payment_blueprint.route("/", methods=['POST'])
-@payment_blueprint.route('/create_payment', methods=['POST'])
-def create_payment():
+@timer
+def create_payment(request):
     """
         This function is used to make a payment. This API currently only supports
         paying off loans, and not other types of payments. If the payment requested
@@ -36,3 +36,37 @@ def create_payment():
     except ValidationError as e:
         print(e)
         return make_response(e.json(), 400)
+
+@payment_blueprint.route("/", methods=['POST'])
+@payment_blueprint.route('/create_payment', methods=['POST'])
+def create_payment_handler():
+    return create_payment(request)
+
+@timer
+def get_payment(request):
+    """
+        This function is used to get a payment. This API currently only supports
+        paying off loans, and not other types of payments. 
+        It just expects a JSON of the following format:
+        {
+            'payment_id' :  <id of payment>
+        }
+    """
+    input_json = request.get_json(force=True)
+    try:
+        # Validate inputs.
+        payment_data = Get_PaymentModel(**input_json)
+    
+        payment = Payment.query.get(payment_data.payment_id)
+        loan = Loan.query.get(payment.loan_id)
+        return make_response(jsonify_payment(payment, loan), 200)
+    except ValidationError as e:
+        print(e)
+        return make_response(e.json(), 400)
+
+@payment_blueprint.route("/", methods=["GET"])
+@payment_blueprint.route("/get_payment", methods=["GET"])
+def get_payment_handler():
+    return get_payment(request)
+
+
