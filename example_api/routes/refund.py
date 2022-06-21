@@ -1,11 +1,9 @@
 from flask import Blueprint, make_response, request
 from pydantic import ValidationError
-from database import db
-from example_api.models.models import RefundModel, Payment, Loan, jsonify_refund
+from ..database import db
+from example_api.models.models import RefundModel
+from example_api.db.orm import Payment, Loan, jsonify_refund
 from .helper_functions import timer
-####
-# MAKE SURE TO ADD TIMING METRICS as DATAVALUES AS WELL AS ROUTE DECORATORS
-####
 
 refund_blueprint = Blueprint("refund", __name__, url_prefix="/refund")
 

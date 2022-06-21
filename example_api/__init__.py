@@ -3,7 +3,7 @@ from example_api.routes import blueprints
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from database import db
+from example_api.db.orm import db
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False

@@ -1,8 +1,9 @@
 
 from flask import Blueprint, make_response, request
 from pydantic import ValidationError
-from database import db
-from example_api.models.models import LoanCreateModel, Get_LoanModel, Loan, jsonify_loan
+from ..database import db
+from example_api.models.models import LoanCreateModel, Get_LoanModel
+from example_api.db.orm import Loan, jsonify_loan
 from .helper_functions import timer
 
 loan_blueprint = Blueprint("loan", __name__, url_prefix="/loan")

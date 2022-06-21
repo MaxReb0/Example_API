@@ -1,6 +1,6 @@
 from datetime import datetime
-from database import db
-from flask import jsonify
+from ..database import db
+from example_api.db.orm import Loan, Payment
 from pydantic import BaseModel, validator, conint
 from pydantic.fields import ModelField
 from sqlalchemy.sql import func
@@ -12,14 +12,10 @@ ADD ANOTHER FILE TO SEPERATE ORM MODELS.
 PUT DB FUNCTIONALITY IN CRUD
 import module and not the function itself when it is being patched.
 mocker.patch
+
+mocked_loan_getter = mocker.patch("path...")
+mocked.loan
 """
-class Loan(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    loan_amount = db.Column(db.Integer)
-    amount_owed = db.Column(db.Integer)
-    time_created = db.Column(db.DateTime(timezone=True), default=datetime.now())
-    time_updated = db.Column(db.DateTime(timezone=True), default=datetime.now(), onupdate=datetime.now())
-    payments = db.relationship('Payment', backref='loan', lazy='dynamic')
 
 
 class LoanCreateModel(BaseModel):
@@ -40,16 +36,6 @@ class Get_LoanModel(BaseModel):
         if db.session.query(Loan.id).filter_by(id = loan_id).first() is None:
             raise ValueError(f"Error, id : {loan_id} is not in the database!")
         return loan_id
-
-class Payment(db.Model):
-    #Add timestamp
-    #Check if there was a payment for the loan in the last x minutes
-    id = db.Column(db.Integer, primary_key=True)
-    payment_amount = db.Column(db.Integer)
-    loan_id = db.Column(db.Integer, db.ForeignKey('loan.id'))
-    time_created = db.Column(db.DateTime(timezone=True), default=datetime.now())
-    time_updated = db.Column(db.DateTime(timezone=True), default=datetime.now(), onupdate=datetime.now())
-    refunded = db.Column(db.Boolean)
 
 class PaymentModel(BaseModel):
     # Need to verify that this loan exists in the database.
@@ -109,42 +95,3 @@ class RefundModel(BaseModel):
             if payment.refunded:
                 raise ValueError(f"Error, payment id : {payment_id} has already been refunded!")
         return payment_id
-
-
-
-def jsonify_payment(payment, loan):
-    return jsonify(
-        {
-            "loan_amount" : loan.loan_amount,
-            "payment_id" : payment.id,
-            "payment_amount" : payment.payment_amount,
-            "loan_id" : loan.id,
-            "amount_owed" : loan.amount_owed,
-            "refunded" : payment.refunded
-        }
-    )
-
-def jsonify_loan(loan):
-    return jsonify({
-            'loan_id' : loan.id,
-            'loan_amount' : loan.loan_amount,
-            'amount_owed' : loan.amount_owed
-        })
-
-def jsonify_refund(payment, loan):
-    return jsonify(
-        {
-            "Success" : "Payment: " + str(payment.id) + " has been refunded successfully.",
-            "Payment Information" : {
-                "payment_id" : payment.id,
-                "payment_amount" : payment.payment_amount,
-                "loan_id" : loan.id,
-                "refunded" : payment.refunded
-            },
-            "Loan Information" : {
-                'loan_id' : loan.id,
-                'loan_amount' : loan.loan_amount,
-                'amount_owed' : loan.amount_owed
-            }
-        }
-    )
