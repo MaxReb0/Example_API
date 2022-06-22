@@ -5,6 +5,7 @@ from ..database import db
 from .helper_functions import timer
 from example_api.models.models import PaymentModel, Get_PaymentModel, LoanCreateModel
 from example_api.db.orm import Loan, Payment, jsonify_payment
+from example_api.db.crud import db_add, loan_getter, payment_getter
 
 payment_blueprint = Blueprint("payment", __name__, url_prefix="/payment")
 
@@ -25,14 +26,13 @@ def create_payment(request):
     input_json = request.get_json(force=True)
     try:
         #Instantiate this class, and check if there are any issues.
-        PaymentModel(**input_json)
+        payment_data = PaymentModel(**input_json)
 
         #Once validated, can simply create the payment, and add it to the database.
-        loan = Loan.query.get(input_json['loan_id'])
+        loan = loan_getter(payment_data.loan_id)
         new_payment = Payment(payment_amount = input_json['payment_amount'], loan = loan, refunded = False)
-        db.session.add(new_payment)
         loan.amount_owed = loan.amount_owed - new_payment.payment_amount
-        db.session.commit()
+        db_add(new_payment)
         return make_response(jsonify_payment(new_payment, loan), 200)
     except ValidationError as e:
         print(e)
@@ -58,8 +58,8 @@ def get_payment(request):
         # Validate inputs.
         payment_data = Get_PaymentModel(**input_json)
     
-        payment = Payment.query.get(payment_data.payment_id)
-        loan = Loan.query.get(payment.loan_id)
+        payment = payment_getter(payment_data.payment_id)
+        loan = loan_getter(payment.loan_id)
         return make_response(jsonify_payment(payment, loan), 200)
     except ValidationError as e:
         print(e)

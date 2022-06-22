@@ -4,6 +4,7 @@ from pydantic import ValidationError
 from ..database import db
 from example_api.models.models import LoanCreateModel, Get_LoanModel
 from example_api.db.orm import Loan, jsonify_loan
+from example_api.db.crud import db_add, loan_getter
 from .helper_functions import timer
 
 loan_blueprint = Blueprint("loan", __name__, url_prefix="/loan")
@@ -15,8 +16,7 @@ def create_loan(request):
         loan_create_request = LoanCreateModel(**data)
 
         new_loan = Loan(loan_amount = loan_create_request.loan_amount, amount_owed = loan_create_request.loan_amount)
-        db.session.add(new_loan)
-        db.session.commit()
+        db_add(new_loan)
         return make_response(jsonify_loan(new_loan), 200)
     except ValidationError as e:
         return make_response(e.json(), 400)
@@ -36,7 +36,7 @@ def get_loan(request):
         #Validate inputs.
         loan_data = Get_LoanModel(**input_json)
         
-        loan = Loan.query.get(loan_data.loan_id)
+        loan = loan_getter(loan_data.loan_id)
         return make_response(jsonify_loan(loan), 200)
     except ValidationError as e:
         print(e)

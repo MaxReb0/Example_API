@@ -1,6 +1,7 @@
 from datetime import datetime
 from ..database import db
 from example_api.db.orm import Loan, Payment
+from example_api.db.crud import check_loan_existence, loan_getter, payment_getter, check_payment_existence
 from pydantic import BaseModel, validator, conint
 from pydantic.fields import ModelField
 from sqlalchemy.sql import func
@@ -33,7 +34,7 @@ class Get_LoanModel(BaseModel):
 
     @validator("loan_id")
     def does_loan_exist(cls, loan_id):
-        if db.session.query(Loan.id).filter_by(id = loan_id).first() is None:
+        if check_loan_existence(loan_id) is None:
             raise ValueError(f"Error, id : {loan_id} is not in the database!")
         return loan_id
 
@@ -44,7 +45,7 @@ class PaymentModel(BaseModel):
 
     @validator("loan_id")
     def id_must_be_in_database(cls, loan_id):
-        if db.session.query(Loan.id).filter_by(id = loan_id).first() is None:
+        if check_loan_existence(loan_id) is None:
             raise ValueError(f"Error, loan id : {loan_id} is not in the database of loans!")
         return loan_id
     
@@ -62,8 +63,8 @@ class PaymentModel(BaseModel):
     def payment_greater_than_amount_owed(cls, payment_amount, values):
         if "loan_id" in values.keys():
             loan_id = values["loan_id"]
-            if db.session.query(Loan.id).filter_by(id = loan_id).first() is not None:
-                loan = Loan.query.get(loan_id)
+            if check_loan_existence(loan_id) is not None:
+                loan = loan_getter(loan_id)
                 if loan.amount_owed < payment_amount:
                     raise ValueError(f"Error, loan {loan_id} only needs {loan.amount_owed}, but the payment amount is {payment_amount}.")
                 return payment_amount
@@ -83,15 +84,15 @@ class RefundModel(BaseModel):
 
     @validator("payment_id")
     def id_must_be_in_database(cls, payment_id):
-        if db.session.query(Payment.id).filter_by(id = payment_id).first() is None:
+        if check_payment_existence(payment_id) is None:
             raise ValueError(f"Error, payment id : {payment_id} is not in the database of payments!")
         return payment_id
     
     @validator("payment_id")
     def payment_must_not_be_already_refunded(cls, payment_id):
-        existance = db.session.query(Payment.id).filter_by(id = payment_id).first()
+        existance = check_payment_existence(payment_id)
         if existance is not None:
-            payment = Payment.query.get(payment_id)
+            payment = payment_getter(payment_id)
             if payment.refunded:
                 raise ValueError(f"Error, payment id : {payment_id} has already been refunded!")
         return payment_id
