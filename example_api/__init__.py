@@ -11,6 +11,8 @@ app.url_map.strict_slashes = False
 for _ in map(app.register_blueprint, blueprints): ...
 app.config.from_object(Config)
 db.init_app(app)
+with app.app_context():
+    db.create_all()
 migrate = Migrate(app, db)
 
 from example_api import routes, models

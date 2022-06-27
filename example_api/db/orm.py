@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from ..database import db
 from flask import jsonify
 
@@ -15,7 +15,7 @@ class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     payment_amount = db.Column(db.Integer)
     loan_id = db.Column(db.Integer, db.ForeignKey('loan.id'))
-    time_created = db.Column(db.DateTime(timezone=True), default=datetime.now())
+    time_created = db.Column(db.DateTime(timezone=True), default=datetime.utcnow())
     time_updated = db.Column(db.DateTime(timezone=True), default=datetime.now(), onupdate=datetime.now())
     refunded = db.Column(db.Boolean)
 

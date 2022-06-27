@@ -6,6 +6,7 @@ from .helper_functions import timer
 from example_api.models.models import PaymentModel, Get_PaymentModel, LoanCreateModel
 from example_api.db.orm import Loan, Payment, jsonify_payment
 from example_api.db.crud import db_add, loan_getter, payment_getter
+from datetime import datetime
 
 payment_blueprint = Blueprint("payment", __name__, url_prefix="/payment")
 
@@ -30,7 +31,7 @@ def create_payment(request):
 
         #Once validated, can simply create the payment, and add it to the database.
         loan = loan_getter(payment_data.loan_id)
-        new_payment = Payment(payment_amount = payment_data.payment_amount, loan = loan, refunded = False)
+        new_payment = Payment(payment_amount = payment_data.payment_amount, loan = loan, refunded = False, time_created = datetime.utcnow())
         loan.amount_owed = loan.amount_owed - new_payment.payment_amount
         db_add(new_payment)
         return make_response(jsonify_payment(new_payment, loan), 200)

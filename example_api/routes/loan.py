@@ -6,6 +6,7 @@ from example_api.models.models import LoanCreateModel, Get_LoanModel
 from example_api.db.orm import Loan, jsonify_loan
 from example_api.db.crud import db_add, loan_getter
 from .helper_functions import timer
+from datetime import datetime
 
 loan_blueprint = Blueprint("loan", __name__, url_prefix="/loan")
 
@@ -25,7 +26,7 @@ def create_loan(request):
     try:
         loan_create_request = LoanCreateModel(**data)
 
-        new_loan = Loan(loan_amount = loan_create_request.loan_amount, amount_owed = loan_create_request.loan_amount)
+        new_loan = Loan(loan_amount = loan_create_request.loan_amount, amount_owed = loan_create_request.loan_amount, time_created = datetime.utcnow())
         db_add(new_loan)
         return make_response(jsonify_loan(new_loan), 200)
     except ValidationError as e:

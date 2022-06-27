@@ -9,7 +9,8 @@ from flask_migrate import Migrate
 from example_api.config import Config
 from example_api import app as application
 from example_api.db.orm import Loan, Payment
-import example_api.db
+#import example_api.db
+from example_api.db.orm import db
 
 """
     Use timing functions from tutorial to better time functionality of API
@@ -21,7 +22,9 @@ import example_api.db
 def client():
     with application.test_client() as client:
         application.config.from_object(Config)
-        db = SQLAlchemy(application)
+        db.init_app(application)
+        with application.app_context():
+            db.create_all()
         migrate = Migrate(application, db)
         yield client
 
@@ -84,8 +87,9 @@ def test_create_large_loan(mocker, client):
 @patch("example_api.routes.payment.loan_getter", return_value = Loan(loan_amount = 25000, amount_owed = 25000))
 @patch("example_api.models.models.loan_getter", return_value = Loan(loan_amount = 25000, amount_owed = 25000))
 def test_create_payment(mock1, mock2, mock3, mock4, client):
-    test_data = {"loan_id" : 12, "payment_amount" : 20000}
+    test_data = {"loan_id" : 1, "payment_amount" : 20000}
     resp = client.post("/payment/", json = test_data)
+    print(resp.data)
     status_code = resp.status_code
     resp = json.loads(resp.data)
     assert resp['amount_owed'] == 5000

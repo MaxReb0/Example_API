@@ -40,9 +40,10 @@ class PaymentModel(BaseModel):
     
     @validator("loan_id")
     def cannot_make_duplicate_payments(cls, loan_id):
-        current_time = datetime.now()
+        current_time = datetime.utcnow()
         payments = Payment.query.filter(loan_id == Payment.loan_id)
         for p in payments:
+            print(f"Payment ID: {p.id}, Creation Time: {p.time_created}, Difference from current time {(current_time - p.time_created).seconds}\n")
             if (current_time - p.time_created).seconds < 30:
                 raise ValueError(f"Error, a payment has already been made to loan {loan_id} in the past 30 seconds. ")
         return loan_id
