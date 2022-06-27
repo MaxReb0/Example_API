@@ -4,9 +4,6 @@ from example_api.db.orm import Loan, Payment
 from example_api.db.crud import check_loan_existence, loan_getter, payment_getter, check_payment_existence
 from pydantic import BaseModel, validator, conint
 from pydantic.fields import ModelField
-from sqlalchemy.sql import func
-import uuid
-
 
 class LoanCreateModel(BaseModel):
     loan_amount: int

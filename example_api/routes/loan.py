@@ -1,4 +1,3 @@
-
 from flask import Blueprint, make_response, request
 from pydantic import ValidationError
 from ..database import db

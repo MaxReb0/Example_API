@@ -8,9 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from example_api.config import Config
 from example_api import app as application
-from example_api.db.orm import Loan, Payment
-#import example_api.db
-from example_api.db.orm import db
+from example_api.db.orm import Loan, Payment, db
 
 """
     Use timing functions from tutorial to better time functionality of API
