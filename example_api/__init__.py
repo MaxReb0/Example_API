@@ -1,6 +1,6 @@
 from flask import Flask
 from example_api.routes import blueprints
-from config import Config
+from example_api.config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from example_api.db.orm import db

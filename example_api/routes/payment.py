@@ -30,18 +30,13 @@ def create_payment(request):
 
         #Once validated, can simply create the payment, and add it to the database.
         loan = loan_getter(payment_data.loan_id)
-        new_payment = Payment(payment_amount = input_json['payment_amount'], loan = loan, refunded = False)
+        new_payment = Payment(payment_amount = payment_data.payment_amount, loan = loan, refunded = False)
         loan.amount_owed = loan.amount_owed - new_payment.payment_amount
         db_add(new_payment)
         return make_response(jsonify_payment(new_payment, loan), 200)
     except ValidationError as e:
         print(e)
         return make_response(e.json(), 400)
-
-@payment_blueprint.route("/", methods=['POST'])
-@payment_blueprint.route('/create_payment', methods=['POST'])
-def create_payment_handler():
-    return create_payment(request)
 
 @timer
 def get_payment(request):
@@ -64,6 +59,11 @@ def get_payment(request):
     except ValidationError as e:
         print(e)
         return make_response(e.json(), 400)
+
+@payment_blueprint.route("/", methods=['POST'])
+@payment_blueprint.route('/create_payment', methods=['POST'])
+def create_payment_handler():
+    return create_payment(request)
 
 @payment_blueprint.route("/", methods=["GET"])
 @payment_blueprint.route("/get_payment", methods=["GET"])

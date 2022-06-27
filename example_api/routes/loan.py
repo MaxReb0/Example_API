@@ -11,6 +11,16 @@ loan_blueprint = Blueprint("loan", __name__, url_prefix="/loan")
 
 @timer
 def create_loan(request):
+    """
+        The purpose of this function is to take in a JSON request that will be processed
+        and append a loan to the loan table in the database. The goal here is that it
+        will eventually be linked to the User that initiated the loan, as well as the 
+        attempts to pay off the loan.
+        Expects JSON of format:
+        {
+            "loan_amount" : <amount being requested for loan.>
+        }
+    """
     data = request.get_json(force=True)
     try:
         loan_create_request = LoanCreateModel(**data)

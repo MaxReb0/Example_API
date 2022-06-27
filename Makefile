@@ -50,4 +50,5 @@ test:
 	pytest
 
 run:
+	export FLASK_APP=example_api:app
 	@flask run
