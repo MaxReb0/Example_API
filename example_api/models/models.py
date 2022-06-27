@@ -7,17 +7,6 @@ from pydantic.fields import ModelField
 from sqlalchemy.sql import func
 import uuid
 
-"""
-ADD TIMESTAMPS AS VARIABLES AS WELL AS FUNCTION TIMERS<
-ADD ANOTHER FILE TO SEPERATE ORM MODELS.
-PUT DB FUNCTIONALITY IN CRUD
-import module and not the function itself when it is being patched.
-mocker.patch
-
-mocked_loan_getter = mocker.patch("path...")
-mocked.loan
-"""
-
 
 class LoanCreateModel(BaseModel):
     loan_amount: int

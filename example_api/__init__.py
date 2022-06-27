@@ -10,7 +10,6 @@ app.url_map.strict_slashes = False
 
 for _ in map(app.register_blueprint, blueprints): ...
 app.config.from_object(Config)
-#db = SQLAlchemy(app)
 db.init_app(app)
 migrate = Migrate(app, db)
 

@@ -1,4 +1,3 @@
-"""Define ORM models here"""
 from datetime import datetime
 from ..database import db
 from flask import jsonify
@@ -12,7 +11,6 @@ class Loan(db.Model):
     payments = db.relationship('Payment', backref='loan', lazy='dynamic')
 
 class Payment(db.Model):
-    #Add timestamp
     #Check if there was a payment for the loan in the last x minutes
     id = db.Column(db.Integer, primary_key=True)
     payment_amount = db.Column(db.Integer)

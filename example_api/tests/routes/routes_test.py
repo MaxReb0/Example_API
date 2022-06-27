@@ -12,17 +12,8 @@ from example_api.db.orm import Loan, Payment
 import example_api.db
 
 """
-    Write unit tests so that your server doesn't have to be actually running. Use request_mock. Reference Flask tutorial
-
-    Use Pydantic -> Update: Have implemented pydantic for every route in the API. It is a little concerning with all
-                        of the boiler plate code due to the need for both a database (SQLAlchemy) compatible class
-                        as well as a Pydantic compatible class.
-                            Is there a better way to do this?
-    Write unit tests properly
     Use timing functions from tutorial to better time functionality of API
     Look into raising error properly from Flask tutorial chapter 7
-    Remember the time a payment to a loan was made, and don't let another payment be made in the next 30s to prevent 
-        duplicate charges.
     Eeno , also look into rust.
 """
 
