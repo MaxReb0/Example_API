@@ -7,6 +7,10 @@ DESCRIPTION:
 
     The data for these requests are stored in a local SQL database using flask_sqlalchemy.
 
+    All of the data validation was done using Pydantic.
+
+    All of the tests are done using pytest.
+
 INSTALLATION:
     To install the application and get it running, follow these steps:
     
