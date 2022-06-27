@@ -31,7 +31,8 @@ def create_payment(request):
 
         #Once validated, can simply create the payment, and add it to the database.
         loan = loan_getter(payment_data.loan_id)
-        new_payment = Payment(payment_amount = payment_data.payment_amount, loan = loan, refunded = False, time_created = datetime.utcnow())
+        #Should this be loan_id?
+        new_payment = Payment(payment_amount = payment_data.payment_amount, loan_id = loan.id, refunded = False, time_created = datetime.utcnow())
         loan.amount_owed = loan.amount_owed - new_payment.payment_amount
         db_add(new_payment)
         return make_response(jsonify_payment(new_payment, loan), 200)
