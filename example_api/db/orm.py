@@ -11,7 +11,6 @@ class Loan(db.Model):
     payments = db.relationship('Payment', backref='loan', lazy='dynamic')
 
 class Payment(db.Model):
-    #Check if there was a payment for the loan in the last x minutes
     id = db.Column(db.Integer, primary_key=True)
     payment_amount = db.Column(db.Integer)
     loan_id = db.Column(db.Integer, db.ForeignKey('loan.id'))

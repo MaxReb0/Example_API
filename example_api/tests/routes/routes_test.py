@@ -10,12 +10,6 @@ from example_api.config import Config
 from example_api import app as application
 from example_api.db.orm import Loan, Payment, db
 
-"""
-    Use timing functions from tutorial to better time functionality of API
-    Look into raising error properly from Flask tutorial chapter 7
-    Eeno , also look into rust.
-"""
-
 @pytest.fixture()
 def client():
     with application.test_client() as client:
