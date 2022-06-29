@@ -11,6 +11,9 @@ DESCRIPTION:
 
     All of the tests are done using pytest.
 
+    Wrote a simple timing wrapper that prints the timing of 
+    each route to the server.
+
 INSTALLATION:
     To install the application and get it running, follow these steps:
     
