@@ -41,9 +41,7 @@ FUNCTIONALITY:
             METHOD: POST
 
             The purpose of this function is to take in a JSON request that will be processed
-            and append a loan to the loan table in the database. The goal here is that it
-            will eventually be linked to the User that initiated the loan, as well as the 
-            attempts to pay off the loan.
+            and append a loan to the loan table in the database. 
             Expects JSON of format:
             {
                 "loan_amount" : <amount being requested for loan.>
