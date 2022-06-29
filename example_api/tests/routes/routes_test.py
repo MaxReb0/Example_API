@@ -22,8 +22,6 @@ def client():
 
 @patch("example_api.routes.loan.db_add")
 def test_create_small_loan(mocker, client):
-    #mocked_loan_maker = mocker.patch("example_api.db.crud.db_add")
-    #mocked_loan_maker.side_effect = [None]
     test_data = {"loan_amount" : 2}
     resp = client.post("loan/", json = test_data)
     status_code = resp.status_code
@@ -126,35 +124,12 @@ def test_create_negative_payment(mock1, mock2, mock3, mock4, client):
     assert resp == [{'loc': ['payment_amount'], 'msg': 'ensure this value is greater than 0', 'type': 'value_error.number.not_gt', 'ctx': {'limit_value': 0}}]
     assert status_code == 400
 
-########## FINISH THESE LAST 3 TESTS!!!!!!!!!! ##############
-
 @patch("example_api.routes.refund.loan_getter", return_value = Loan(loan_amount = 25000, amount_owed = 5000))
 @patch("example_api.routes.refund.payment_getter", return_value = Payment(payment_amount = 20000, loan = Loan(loan_amount = 25000, amount_owed = 25000), refunded = False))
 @patch("example_api.routes.refund.db_commit")
 @patch("example_api.models.models.check_payment_existence", return_value = (1,))
 @patch("example_api.models.models.payment_getter", return_value = Payment(payment_amount = 20000, loan = Loan(loan_amount = 25000, amount_owed = 25000), refunded = False))
 def test_create_refund(mock1, mock2, mock3, mock4, mock5, client):
-    """
-        test_data = {"loan_amount" : 25000}
-        resp = client.post("/loan", json = test_data)
-        status_code = resp.status_code
-        resp = json.loads(resp.data)
-        assert resp['amount_owed'] == 25000
-        assert resp['loan_amount'] == 25000
-        assert status_code == 200
-        # Now that we have the proper loan, we should pay it off.
-        test_data = {"loan_id" : resp['loan_id'], "payment_amount" : 20000}
-        resp = client.post("/payment", json = test_data)
-        status_code = resp.status_code
-        resp = json.loads(resp.data)
-        assert resp['amount_owed'] == 5000
-        assert resp['loan_amount'] == 25000
-        assert resp['payment_amount'] == 20000
-        assert not resp['refunded']
-        assert status_code == 200
-    """
-
-    #Now that we have payed it off, we should refund the payment.
     test_data = {"payment_id" : 12}
     resp = client.post("/refund", json = test_data)
     print(resp)
